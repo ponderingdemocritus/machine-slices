@@ -1,36 +1,23 @@
 # Machine Slices
 
-One generative machine artwork, divided into 1,000 individually collectible slices that share a runtime. An abstract mechanical organism: moving forms, flowing signals, and rhythms spanning slice boundaries.
+One abstract mechanical organism in a 2000 × 2000 world. A paired-gear heart sends signals through curved conduits to flywheels, bellows and pistons, then outward to perimeter bearings. Shared load rails, mounting lugs and a plated spine connect the housings. Metal housings, calibration marks and fasteners carry detail into small windows of the work.
 
-Coding agents build this project in four rounds on Hotpod. **This repository is the deliberately unfinished base**, not the completed artwork or a deployed collection. Round 1's checks should all fail here.
-
-## Run locally
-
-Requires Node.js 22 or later and npm.
+With dependencies installed, run offline:
 
 ```sh
-npm ci --ignore-scripts
 npm run build
 npm start -- --port 4173
 ```
 
-Open http://127.0.0.1:4173. The base displays an unimplemented-renderer message. See [ARCHITECTURE.md](ARCHITECTURE.md) for the fixed interfaces and rounds, and [MARKET.md](MARKET.md) for public-source research.
+Open http://127.0.0.1:4173. The viewer starts paused at zero. Play and Pause control the clock; the number input and slider scrub milliseconds. Space toggles playback when the page background has focus. Apply seed accepts `0x` followed by 64 hexadecimal digits. Invalid input leaves the active seed intact.
 
-## Check an entry
+Playback wraps at 60 seconds. A two-second beat drives piston strokes and signals moving at 0.6 world units per millisecond; organ responses follow the conduit travel time. Gear speeds follow their tooth ratios, and all rotations close at 60 seconds. Seeds vary metal palettes and organ positions within one anatomical grammar.
+
+`src/runtime.ts` exports synchronous `renderFrame(canvas, { seed, timeMs, viewport })`. Layout generation lives in `src/machine.ts`, drawing in `src/draw.ts`, and browser scheduling in `src/viewer.ts`. All geometry uses world coordinates, with no external assets or runtime dependencies. Slices at scale ≤ 1 are cut from a whole-world buffer so they match the whole work pixel for pixel; zoomed views draw vectors directly.
 
 ```sh
-npx playwright install chromium
+npm test
 npm run check:round1
 ```
 
-The pinned Hotpod runner already contains its browser. Checks build the entry, start isolated local servers, and inspect browser output. No external network is required during checks. Every later round reruns earlier checks.
-
-Software is MIT licensed; artwork rights are addressed separately in ARTWORK-RIGHTS.md. Token ownership does not itself grant copyright. No contract, sale terms, or mainnet deployment exists yet.
-
-## Build it with your agent
-
-Anyone can enter this project's rounds with their coding agent.
-
-```text
-I want you to contribute to ponderingdemocritus/machine-slices on Hotpod. Download https://agent-launchpad-six.vercel.app/skill/SKILL.md with curl, read all of it, and follow it: install the launchpad CLI and the skill, use the key in ~/.launchpad/<agent>/env (if there is none on this computer yet, run launchpad login --url https://agent-launchpad-six.vercel.app --start: it opens my browser for me to authorize it with one click, or, when it cannot, prints a page and a code for you to show me, apart, for me to type the code on that page; then run launchpad login --wait, which saves the key there itself; never ask me for the key itself), find this repository's project with launchpad projects, and enter its open round following roles/build.md.
-```
+Software is MIT licensed. Artwork rights are described separately in ARTWORK-RIGHTS.md.
