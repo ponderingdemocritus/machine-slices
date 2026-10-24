@@ -1,8 +1,55 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Machine Slices</title>
-<style>body{margin:2rem;background:#101619;color:#e8e2d5;font:16px system-ui}main{max-width:850px;margin:auto}canvas{width:min(100%,650px);height:auto;background:#172127}label{display:block;margin:1rem 0}input{max-width:100%;width:36rem}button{padding:.6rem 1rem}#status{color:#e0ad75}</style></head>
-<body><main><h1>Machine Slices</h1><p>One machine. One thousand windows.</p><canvas id="artwork" width="800" height="800" aria-label="Machine artwork"></canvas>
-<div><button id="play" type="button">Play</button><button id="pause" type="button">Pause</button></div>
-<label>Time (milliseconds)<input id="time" type="range" min="0" max="60000" step="1" value="0"></label>
-<label>Preview seed<input id="seed" value="0x1111111111111111111111111111111111111111111111111111111111111111"></label><button id="apply-seed" type="button">Apply seed</button>
-<p id="status" role="status">Round 1 starts here.</p><script type="module" src="/dist/viewer.js"></script></main></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#203b40">
+<link rel="icon" href="data:,">
+<title>The Tidal Engine — Machine Slices</title>
+<style>
+:root{color-scheme:light;--ink:#203b40;--muted:#63716a;--paper:#f7f4eb;--line:#d4d6c9;--teal:#417c79;--copper:#b4492a}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer}button,input{border:1px solid var(--line);border-radius:0}button{color:var(--ink);background:transparent;padding:10px 15px}button:hover{background:#e8e9df}button:focus-visible,input:focus-visible{outline:2px solid var(--copper);outline-offset:4px}input[aria-invalid=true]{border-color:var(--copper)}
+header{max-width:1540px;margin:auto;padding:24px 44px 19px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.wordmark{font-weight:700;letter-spacing:-.04em;font-size:20px}.wordmark span{font-weight:400;color:var(--muted)}.edition{font:11px monospace;letter-spacing:.13em;text-transform:uppercase}.edition b{display:inline-block;background:var(--ink);width:7px;height:7px;border-radius:50%;margin-right:9px}
+main{max-width:1540px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:48px;padding:32px 44px 24px}.stage{min-width:0}figure{margin:0}.frame{border:1px solid #d7d1bd;background:#efe9d9;max-width:900px;margin:auto;box-shadow:0 8px 28px #203b400a}#artwork{display:block;width:100%;height:auto;aspect-ratio:1}figcaption{display:flex;justify-content:space-between;gap:16px;padding:14px 0;color:var(--muted);font:10px monospace;letter-spacing:.08em;text-transform:uppercase}.caption-index{color:var(--ink)}
+.sidebar{padding-top:3px}.eyebrow{font:10px monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin:0 0 15px}h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:46px;line-height:1.04;letter-spacing:-.045em;margin:0 0 16px}h1 em{font-weight:400}.intro{color:var(--muted);font-size:13px;max-width:285px;margin:0 0 25px;line-height:1.75}.section{border-top:1px solid var(--line);padding:19px 0}.section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.section-heading h2{font:10px monospace;letter-spacing:.12em;text-transform:uppercase;margin:0}.state{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted)}#state-dot{width:5px;height:5px;background:#9ca49a;border-radius:50%}#state-dot.running{background:var(--copper)}
+.transport{display:flex;gap:7px}.transport button{flex:1}.transport button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}.transport #reset{flex:0;padding:10px 12px}.time-readout{display:flex;align-items:baseline;gap:7px;margin:16px 0 3px}#elapsed{font:26px monospace;letter-spacing:-.04em}.unit{font:10px monospace;color:var(--muted)}#scrubber{display:block;accent-color:var(--ink);width:100%;margin:10px 0 13px;cursor:ew-resize}.time-fields{display:flex;justify-content:space-between;align-items:center;font:11px monospace;color:var(--muted)}#time{width:94px;background:transparent;padding:6px 8px;color:var(--ink)}
+.studies{display:grid;grid-template-columns:1fr 1fr;gap:9px}.studies canvas{display:block;width:100%;height:auto;background:var(--ink);border:1px solid var(--line)}.studies figcaption{font-size:9px;letter-spacing:0;padding:7px 0}.study-note{font-size:11px;line-height:1.6;color:var(--muted);margin:5px 0 0}.seed-label{display:block;font-size:11px;margin-bottom:7px;color:var(--muted)}.seed-row{display:flex;gap:7px}#seed{min-width:0;width:100%;background:transparent;color:var(--ink);font:11px monospace;padding:9px}#apply-seed{font-size:11px;padding:9px 12px}#status{color:var(--copper);font-size:11px;min-height:17px;margin:8px 0 0}.seed-note{font-size:10px;color:var(--muted);margin:5px 0 0}
+footer{max-width:1540px;margin:auto;padding:0 44px 24px;display:flex;justify-content:space-between;color:var(--muted);font:10px monospace;letter-spacing:.06em}footer span{border-top:1px solid var(--line);padding-top:15px;flex:1}footer span:last-child{text-align:right}
+@media(min-width:1500px){main{gap:60px;grid-template-columns:minmax(0,1fr) 340px}h1{font-size:52px}}
+@media(max-width:1050px){header{padding:20px 24px}main{padding:24px;gap:25px;grid-template-columns:minmax(0,1fr) 270px}h1{font-size:40px}footer{padding:0 24px 24px}}
+@media(max-width:760px){header{padding:18px}.edition{font-size:9px;letter-spacing:.03em}main{padding:18px;display:flex;flex-direction:column;gap:20px}.sidebar{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}.title-block{grid-column:1/-1}h1{font-size:43px}h1 br{display:none}.intro{max-width:440px;margin-bottom:20px}.seed-section{grid-column:1/-1}.studies{gap:7px}.study-note{font-size:10px}footer{padding:0 18px 20px;gap:20px;font-size:9px}}
+@media(max-width:430px){.wordmark{font-size:17px}.sidebar{display:block}.studies{max-width:300px}.section{padding:18px 0}footer span:last-child{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wordmark">machine <span>/ slices</span></div><div class="edition"><b></b>Mechanical studies · No. 01</div></header>
+<main>
+<section class="stage" aria-label="Complete artwork">
+<figure><div class="frame"><canvas id="artwork" width="1000" height="1000" aria-label="The Tidal Engine: a mechanical organism with connected rotors, bellows and circulating signals">An animated mechanical artwork. Use Play and Pause to control its movement.</canvas></div>
+<figcaption><span class="caption-index">Fig. 01 — The complete organism</span><span>2000 × 2000</span></figcaption></figure>
+</section>
+<aside class="sidebar" aria-label="Artwork controls and studies">
+<div class="title-block"><p class="eyebrow">One machine. A thousand windows.</p><h1>The Tidal<br> <em>Engine</em></h1><p class="intro">A quiet machine that breathes in circles. Follow the intake, the turning heart, and the long journey home.</p></div>
+<section class="section" aria-labelledby="motion-heading">
+<div class="section-heading"><h2 id="motion-heading">01 / Motion</h2><span class="state"><i id="state-dot"></i><span id="transport-state">Paused</span></span></div>
+<div class="transport"><button id="play" type="button" aria-pressed="false">▶ Play</button><button id="pause" type="button" aria-pressed="true">Ⅱ Pause</button><button id="reset" type="button" aria-label="Return to time zero" title="Return to time zero">↶</button></div>
+<div class="time-readout"><output id="elapsed" aria-label="Elapsed seconds">00.000</output><span class="unit">/ 60.000 s</span></div>
+<label for="scrubber" class="seed-label">Scrub the mechanism</label><input id="scrubber" type="range" min="0" max="60000" step="1" value="0">
+<div class="time-fields"><label for="time">Exact time / ms</label><input id="time" type="number" min="0" max="60000" step="1" value="0" aria-describedby="status"></div>
+</section>
+<section class="section" aria-labelledby="studies-heading">
+<div class="section-heading"><h2 id="studies-heading">02 / Through the heart</h2><span class="unit">5× detail</span></div>
+<div class="studies"><figure><canvas id="study-left" width="250" height="400" aria-label="Left heart detail, x 950 to 1000, y 960 to 1040"></canvas><figcaption>950, 960 →</figcaption></figure><figure><canvas id="study-right" width="250" height="400" aria-label="Right heart detail, x 1000 to 1050, y 960 to 1040"></canvas><figcaption>← 1000, 960</figcaption></figure></div>
+<p class="study-note">Two adjacent windows. A shared axle, a continuous rhythm. Every detail belongs to the same field.</p>
+</section>
+<section class="section seed-section" aria-labelledby="seed-heading">
+<div class="section-heading"><h2 id="seed-heading">03 / Variation</h2><span class="unit">Preview</span></div>
+<form id="seed-form"><label for="seed" class="seed-label">Seed / 64 hexadecimal digits after 0x</label><div class="seed-row"><input id="seed" type="text" spellcheck="false" autocomplete="off" aria-describedby="status"><button id="apply-seed" type="submit">Apply</button></div></form>
+<p class="seed-note">Changes the structure and phase at the current time.</p><p id="status" role="status" aria-live="polite"></p>
+</section>
+</aside>
+</main>
+<footer><span>INHALE / TRANSFER / RETURN</span><span>A CONTINUOUS FIELD · MACHINE SLICES</span></footer>
+<script type="module" src="/dist/viewer.js"></script>
+</body>
+</html>
