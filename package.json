@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node server.mjs",
+    "test": "tsc -p tsconfig.json && node --test test/*.test.mjs",
     "check:round1": "node .launchpad/checks/round-1/run.mjs"
   },
   "devDependencies": {

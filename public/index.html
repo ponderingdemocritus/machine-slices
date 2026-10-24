@@ -1,8 +1,81 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Machine Slices</title>
-<style>body{margin:2rem;background:#101619;color:#e8e2d5;font:16px system-ui}main{max-width:850px;margin:auto}canvas{width:min(100%,650px);height:auto;background:#172127}label{display:block;margin:1rem 0}input{max-width:100%;width:36rem}button{padding:.6rem 1rem}#status{color:#e0ad75}</style></head>
-<body><main><h1>Machine Slices</h1><p>One machine. One thousand windows.</p><canvas id="artwork" width="800" height="800" aria-label="Machine artwork"></canvas>
-<div><button id="play" type="button">Play</button><button id="pause" type="button">Pause</button></div>
-<label>Time (milliseconds)<input id="time" type="range" min="0" max="60000" step="1" value="0"></label>
-<label>Preview seed<input id="seed" value="0x1111111111111111111111111111111111111111111111111111111111111111"></label><button id="apply-seed" type="button">Apply seed</button>
-<p id="status" role="status">Round 1 starts here.</p><script type="module" src="/dist/viewer.js"></script></main></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Machine Slices</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: dark; --ink: #e9e4d8; --muted: #a8a397; --line: #2a2f36; --accent: #e8b46a; --panel: #0d1014; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #07090c; color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { display: grid; gap: 20px; padding: 16px; align-items: start; }
+  .stage { margin: 0; justify-self: center; }
+  #artwork { display: block; width: min(calc(100vw - 32px), calc(100vh - 32px)); aspect-ratio: 1; height: auto; background: #05070a; border-radius: 3px; box-shadow: 0 0 0 1px var(--line), 0 18px 60px rgba(0, 0, 0, 0.6); }
+  .panel { display: grid; gap: 18px; max-width: 34rem; }
+  h1 { margin: 0; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.02em; }
+  .tagline { margin: 2px 0 0; color: var(--accent); }
+  .about { margin: 0; color: var(--muted); }
+  fieldset { margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); display: grid; gap: 10px; }
+  legend { padding: 0 6px; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .field-head { display: flex; justify-content: space-between; gap: 12px; }
+  output { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seed { display: grid; gap: 10px; }
+  button { font: inherit; color: var(--ink); background: #1a1f26; border: 1px solid #39414b; border-radius: 5px; padding: 0.45rem 1rem; cursor: pointer; }
+  button:hover { background: #232a33; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  input[type="text"] { width: 100%; font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); background: #07090c; border: 1px solid #39414b; border-radius: 5px; padding: 0.45rem 0.6rem; }
+  input[aria-invalid="true"] { border-color: #e2685b; }
+  #status { margin: 0; min-height: 1.5em; color: var(--muted); }
+  #status.error { color: #f08a7c; }
+  .keys { margin: 0; color: var(--muted); font-size: 0.85rem; }
+  kbd { font: 12px ui-monospace, monospace; padding: 1px 5px; border: 1px solid #39414b; border-radius: 3px; }
+  @media (min-width: 900px) {
+    main { grid-template-columns: auto minmax(260px, 340px); justify-content: center; }
+    #artwork { width: min(calc(100vh - 32px), calc(100vw - 392px)); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <figure class="stage">
+    <canvas id="artwork" width="1000" height="1000" role="img"
+      aria-label="The machine: a radial engine at the centre pumps pulses of light through branching vessels into gear trains that click as each pulse arrives"></canvas>
+  </figure>
+  <div class="panel">
+    <header>
+      <h1>Machine Slices</h1>
+      <p class="tagline">One machine. One thousand windows.</p>
+    </header>
+    <p class="about">A radial engine beats at the heart of the machine, 72 times a minute. Each beat sends a pulse of light down the vessels; where a pulse reaches a junction, the gear train there clicks forward. Every rhythm divides one minute, so the machine returns to the same moment every 60 seconds.</p>
+    <fieldset>
+      <legend>Time</legend>
+      <div class="row">
+        <button id="play" type="button" aria-pressed="false">Play</button>
+        <button id="pause" type="button" aria-pressed="true">Pause</button>
+      </div>
+      <div class="field-head"><label for="time">Time in milliseconds</label><output id="time-readout" for="time" aria-live="off">0 ms</output></div>
+      <input id="time" type="range" min="0" max="60000" step="1" value="0">
+    </fieldset>
+    <fieldset>
+      <legend>Seed</legend>
+      <form id="seed-form" class="seed" novalidate>
+        <label for="seed">Preview seed</label>
+        <input id="seed" type="text" spellcheck="false" autocomplete="off" aria-describedby="status"
+          value="0x1111111111111111111111111111111111111111111111111111111111111111">
+        <div class="row">
+          <button id="apply-seed" type="submit">Apply seed</button>
+          <button id="random-seed" type="button">Random seed</button>
+        </div>
+      </form>
+    </fieldset>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p class="keys"><kbd>Space</kbd> play or pause · <kbd>←</kbd> <kbd>→</kbd> one beat back or forward</p>
+  </div>
+</main>
+<script type="module" src="/dist/viewer.js"></script>
+</body>
+</html>
